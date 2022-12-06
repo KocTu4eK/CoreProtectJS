@@ -1,8 +1,8 @@
 # CoreProtectMini
 This is an incomplete port of CoreProtect written in NodeJS with few features. Made by order https://t.me/caliuzz.
 ## Logged
-— Broke/place of the block  
-— Installing something with a bucket  
+— Destroying/placing of the block  
+— Placing something with a bucket  
 — Interaction with the block  
 — Changing the container
 ## Capabilities
