@@ -1,0 +1,8 @@
+{
+    "name": "coreprotectmini",
+    "version": "1.0.0",
+    "description": "Stripped down version of CoreProtect",
+    "main": "main.js",
+    "author": "KocTu4eK",
+    "license": "ISC"
+}
