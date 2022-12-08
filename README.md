@@ -12,5 +12,5 @@ This is an incomplete port of CoreProtect written in NodeJS with few features. M
 ## Commands
 — /coreprotect <inspect|i>  
 ⠀⠀/coreprotect <l|lookup> <page>  
-⠀⠀/co - alias  
+⠀⠀/co — alias  
 — /coperms <player: target>
