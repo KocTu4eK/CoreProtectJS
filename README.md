@@ -8,9 +8,11 @@ This is an incomplete port of CoreProtect written in NodeJS with few features. M
 ## Capabilities
 — Write (only) in SQLite  
 — Paginated log output  
-— Permission for the command
+— Permission for the command  
+— Rollback of all actions
 ## Commands
 — /coreprotect <inspect|i>  
 ⠀⠀/coreprotect <l|lookup> <page>  
+⠀⠀/coreprotect <rollback|r> <radius: int> [time: float] [user: string]  
 ⠀⠀/co — alias  
 — /coperms <player: target>

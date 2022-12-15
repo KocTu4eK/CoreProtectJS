@@ -1,15 +1,24 @@
-const { isInspector, setInspector, lookupPage, clearUserPos } = require("./database.js");
+const { isInspector, setInspector, lookupPage, clearUserPos, rollback } = require("./database.js");
 
 mc.listen("onServerStarted", () => {
 	let command = mc.newCommand("coreprotect", "CoreProtect by KocTu4eK.", PermType.Any);
 	command.setAlias("co");
+
 	command.setEnum("Inspect", ["inspect", "i"]);
 	command.setEnum("Lookup", ["lookup", "l"]);
+	command.setEnum("Rollback", ["rollback", "r"]);
+
 	command.mandatory("inspect", ParamType.Enum, "Inspect", 1);
 	command.mandatory("lookup", ParamType.Enum, "Lookup", 1);
 	command.mandatory("page", ParamType.Int);
+	command.mandatory("rollback", ParamType.Enum, "Rollback", 1);
+	command.mandatory("radius", ParamType.Int);
+	command.optional("time", ParamType.Float);
+	command.optional("user", ParamType.String);
+
 	command.overload(["inspect"]);
 	command.overload(["lookup", "page"]);
+	command.overload(["rollback", "radius", "time", "user"]);
 
 	command.setCallback((_cmd, ori, out, res) => {
 		if (ori.player === undefined) return out.error("You are not a player!");
@@ -29,6 +38,11 @@ mc.listen("onServerStarted", () => {
 			if (res.lookup !== undefined) {
 				if (res.page < 1) return out.error("Invalid integer specified!");
 				return lookupPage(ori.player, res.page, out);
+			}
+
+			if (res.rollback !== undefined) {
+				if (res.radius > 128) return out.success("§3CoreProtect §r- The maximum rollback radius is 128.");
+				return rollback(ori.player, res.radius, res.time, res.user, out);
 			}
 		}
 		
