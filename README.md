@@ -18,5 +18,5 @@ This is an incomplete port of CoreProtect written in NodeJS with few features. M
 — /coperms <player: target>
 ## Importantly
 — Do not try to inspect the block with flint and steel on TNT.  
-— After inspecting the block with a hoe, a garden bed will remain.
+— After inspecting the block with a hoe, a garden bed will remain.  
 — If you inspect a liquid by placing a block in it, the liquid will disappear.
