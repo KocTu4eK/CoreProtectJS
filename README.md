@@ -5,7 +5,7 @@ This is an incomplete port of CoreProtect written in NodeJS with few features. M
 — Placing something with a bucket  
 — Interaction with the block  
 — Changing the container
-## Capabilities
+## Features
 — Write (only) in SQLite  
 — Paginated log output  
 — Permission for the command  
@@ -16,3 +16,7 @@ This is an incomplete port of CoreProtect written in NodeJS with few features. M
 ⠀⠀/coreprotect <rollback|r> <radius: int> [time: float] [user: string]  
 ⠀⠀/co — alias  
 — /coperms <player: target>
+## Importantly
+— Do not try to inspect the block with flint and steel on TNT.  
+— After inspecting the block with a hoe, a garden bed will remain.
+— If you inspect a liquid by placing a block in it, the liquid will disappear.
