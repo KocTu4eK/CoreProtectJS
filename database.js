@@ -5,11 +5,12 @@ function initDatabase() {
 
 	session.exec("CREATE TABLE IF NOT EXISTS co_art_map (id INTEGER PRIMARY KEY AUTOINCREMENT, block TEXT UNIQUE)");
 	session.exec("CREATE TABLE IF NOT EXISTS co_user (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname TEXT UNIQUE, inspector INT DEFAULT 0, wid INT DEFAULT -1, x INT DEFAULT 0, y INT DEFAULT -256, z INT DEFAULT 0)");
-	session.exec("CREATE TABLE IF NOT EXISTS co_block (time TIMESTAMP DEFAULT (CAST (((julianday('now') - 2440587.5) * 86400.0 * 1000) AS INT)), block INT, user INT, action INT, wid INT, x INT, y INT, z INT, data INT, count INT, slot INT, rollback INT DEFAULT 0)");
+	session.exec("CREATE TABLE IF NOT EXISTS co_block (time TIMESTAMP DEFAULT (CAST (((julianday('now') - 2440587.5) * 86400.0 * 1000) AS INT)), block INT, user INT, action INT, wid INT, x INT, y INT, z INT, data INT, count INT, slot INT, explode TEXT DEFAULT -1, rollback INT DEFAULT 0)");
 }
 
-function logBlock(pl, blockName, wid, x, y, z, action, tileData, count = -1, slot = -1) {
-	if (!isInspector(pl.realName)) session.exec(`INSERT INTO co_block (block, user, action, wid, x, y, z, data, count, slot) VALUES (${getBlockId(blockName)}, ${getUserId(pl.realName)}, ${action}, ${wid}, ${x}, ${y}, ${z}, ${tileData}, ${count}, ${slot})`);
+function logBlock(pl, blockName, wid, x, y, z, action, tileData, count = -1, slot = -1, chest = false) {
+	if (chest) session.exec(`INSERT INTO co_block (block, user, action, wid, x, y, z, data, count, slot) VALUES (${getBlockId(blockName)}, -1, ${action}, ${wid}, ${x}, ${y}, ${z}, ${tileData}, ${count}, ${slot})`);
+	else if (!isInspector(pl.realName)) session.exec(`INSERT INTO co_block (block, user, action, wid, x, y, z, data, count, slot) VALUES (${getBlockId(blockName)}, ${getUserId(pl.realName)}, ${action}, ${wid}, ${x}, ${y}, ${z}, ${tileData}, ${count}, ${slot})`);
 	else {
 		if (action === 1) mc.setBlock(x, y, z, wid, "minecraft:air", 0);
 		let pageCount = getPageCount(wid, x, y, z);
@@ -19,8 +20,15 @@ function logBlock(pl, blockName, wid, x, y, z, action, tileData, count = -1, slo
 
 			let blockPage = getBlockPage(wid, x, y, z, 0);
 			for (i = 1; i < blockPage.length; i++) {
-				if (blockPage[i][5] !== 1) output += `§7${timeFormat(blockPage[i][0])} ago§r - §3${getUserName(blockPage[i][1])} §r${blockPage[i][3] === 0 ? "broke" : blockPage[i][3] === 1 ? "placed" : blockPage[i][3] === 2 ? "clicked" : blockPage[i][3] === 3 ? `remove §3x${blockPage[i][4]}` : blockPage[i][3] === 4 ? `add §3x${blockPage[i][4]}` : "?"} §3${getBlockName(blockPage[i][2])}§r.\n`;
-				else output += `§o§7${timeFormat(blockPage[i][0])} ago§r§o - §3${getUserName(blockPage[i][1])} §r§o${blockPage[i][3] === 0 ? "broke" : blockPage[i][3] === 1 ? "placed" : blockPage[i][3] === 2 ? "clicked" : blockPage[i][3] === 3 ? `remove §3x${blockPage[i][4]}` : blockPage[i][3] === 4 ? `add §3x${blockPage[i][4]}` : "?"} §3${getBlockName(blockPage[i][2])}§r§o.§r\n`;
+				if (blockPage[i][1] === -1) continue;
+				let actionText = blockPage[i][3] === 0 ? "broke" : blockPage[i][3] === 1 ? "placed" : blockPage[i][3] === 2 ? "clicked" : blockPage[i][3] === 3 ? `remove §3x${blockPage[i][4]}` : blockPage[i][3] === 4 ? `add §3x${blockPage[i][4]}` : blockPage[i][3] === 5 ? "blew up" : "?";
+				if (blockPage[i][3] === 5) {
+					let timeFormatted = timeFormat(blockPage[i][0]);
+					let temp = `§7${timeFormat(blockPage[i][0])} ago§r - `;
+					output += `${temp}§3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n${" ".repeat((temp.length - 4.65) * 1.4 + ((temp.length - temp.replaceAll(/[0-9]/g, "").length) % 2 === 0 ? 0 : 1))}^ §7${blockPage[i][6]}§r\n`
+				}
+				else if (blockPage[i][5] !== 1) output += `§7${timeFormat(blockPage[i][0])} ago§r - §3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n`;
+				else output += `§o§7${timeFormat(blockPage[i][0])} ago§r§o - §3${getUserName(blockPage[i][1])} §r§o${actionText} §3${getBlockName(blockPage[i][2])}§r§o.§r\n`;
 			}
 
 			if (pageCount > 1) output += `-----\nPage 1/${pageCount}. View older data by typing "§3/co l <page>§r".`; 
@@ -49,8 +57,15 @@ function lookupPage(pl, page, out) {
 
 	let blockPage = getBlockPage(userData[0], userData[1], userData[2], userData[3], (page - 1) * 7);
 	for (i = 1; i < blockPage.length; i++) {
-		if (blockPage[i][5] !== 1) output += `§7${timeFormat(blockPage[i][0])} ago§r - §3${getUserName(blockPage[i][1])} §r${blockPage[i][3] === 0 ? "broke" : blockPage[i][3] === 1 ? "placed" : blockPage[i][3] === 2 ? "clicked" : blockPage[i][3] === 3 ? `remove x${blockPage[i][4]}` : blockPage[i][3] === 4 ? `add x${blockPage[i][4]}` : "?"} §3${getBlockName(blockPage[i][2])}§r.\n`;
-		else output += `§o§7${timeFormat(blockPage[i][0])} ago§r§o - §3${getUserName(blockPage[i][1])} §r§o${blockPage[i][3] === 0 ? "broke" : blockPage[i][3] === 1 ? "placed" : blockPage[i][3] === 2 ? "clicked" : blockPage[i][3] === 3 ? `remove x${blockPage[i][4]}` : blockPage[i][3] === 4 ? `add x${blockPage[i][4]}` : "?"} §3${getBlockName(blockPage[i][2])}§r§o.§r\n`;
+		if (blockPage[i][1] === -1) continue;
+		let actionText = blockPage[i][3] === 0 ? "broke" : blockPage[i][3] === 1 ? "placed" : blockPage[i][3] === 2 ? "clicked" : blockPage[i][3] === 3 ? `remove x${blockPage[i][4]}` : blockPage[i][3] === 4 ? `add x${blockPage[i][4]}` : blockPage[i][3] === 5 ? "blew up" : "?";
+		if (blockPage[i][3] === 5) {
+			let timeFormatted = timeFormat(blockPage[i][0]);
+			let temp = `§7${timeFormat(blockPage[i][0])} ago§r - `;
+			output += `${temp}§3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n${" ".repeat((temp.length - 4.65) * 1.4)}^ §7${blockPage[i][6]}§r\n`
+		}
+		if (blockPage[i][5] !== 1) output += `§7${timeFormat(blockPage[i][0])} ago§r - §3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n`;
+		else output += `§o§7${timeFormat(blockPage[i][0])} ago§r§o - §3${getUserName(blockPage[i][1])} §r§o${actionText} §3${getBlockName(blockPage[i][2])}§r§o.§r\n`;
 	}
 
 	if (pageCount > 1) output += `-----\nPage ${page}/${pageCount}. View older data by typing "§3/co l <page>§r".`; 
@@ -64,29 +79,35 @@ function rollback(pl, radius, time, user, out) {
 
 	for (i = 1; i < blockData.length; i++) {
 		switch (blockData[i][1]) {
-			case 0: // break
+		case 0: // break
+		case 5: // explode
 			let blockName = getBlockName(blockData[i][0]);
 			mc.setBlock(blockData[i][3], blockData[i][4], blockData[i][5], blockData[i][2], `minecraft:${blockName === "water" || blockName === "lava" ? "flowing_" + blockName : blockName}`, blockData[i][6]);
 			break;
-			case 1: // place
+		case 1: // place
 			mc.setBlock(blockData[i][3], blockData[i][4], blockData[i][5], blockData[i][2], "minecraft:air", 0);
 			break;
-			case 3: // take out
+		case 3: // take out
 			let ct = mc.getBlock(blockData[i][3], blockData[i][4], blockData[i][5], blockData[i][2]).getContainer();
 			let it = mc.newItem(`minecraft:${getBlockName(blockData[i][0])}`, blockData[i][7] + ct.getAllItems()[blockData[i][8]].count);
 			it.setAux(blockData[i][6]);
 			ct.setItem(blockData[i][8], it);
 			break;
-			case 4: // put
+		case 4: // put
 			mc.getBlock(blockData[i][3], blockData[i][4], blockData[i][5], blockData[i][2]).getContainer().removeItem(blockData[i][8], blockData[i][7]);
+			break;
 		}
 	}
 
 	return out.success("§3CoreProtect §r- Rollback completed.");
 }
 
+function logExplode(srcType, srcX, srcY, srcZ, blockName, wid, x, y, z, tileData) {
+	session.exec(`INSERT INTO co_block (block, user, action, wid, x, y, z, data, count, slot, explode) VALUES (${getBlockId(blockName)}, ${getUserId(srcType === "minecraft:tnt" ? "TNT" : srcType === "minecraft:creeper" ? "Creeper" : "?")}, 5, ${wid}, ${x}, ${y}, ${z}, ${tileData}, -1, -1, "${Math.floor(srcX)}/${Math.floor(srcY)}/${Math.floor(srcZ)}")`);
+}
+
 function getBlockPage(wid, x, y, z, offset) {
-	return session.query(`SELECT time, user, block, action, count, rollback FROM co_block WHERE wid = ${wid} AND x = ${x} AND y = ${y} AND z = ${z} ORDER BY time DESC LIMIT ${offset}, 7`);
+	return session.query(`SELECT time, user, block, action, count, rollback, explode FROM co_block WHERE wid = ${wid} AND x = ${x} AND y = ${y} AND z = ${z} ORDER BY time DESC LIMIT ${offset}, 7`);
 }
 
 function getPageCount(wid, x, y, z) {
@@ -147,5 +168,6 @@ module.exports = {
 	setInspector,
 	lookupPage,
 	clearUserPos,
-	rollback
+	rollback,
+	logExplode
 };
