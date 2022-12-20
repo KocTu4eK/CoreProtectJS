@@ -103,7 +103,7 @@ function rollback(pl, radius, time, user, out) {
 }
 
 function logExplode(srcType, srcX, srcY, srcZ, blockName, wid, x, y, z, tileData) {
-	session.exec(`INSERT INTO co_block (block, user, action, wid, x, y, z, data, count, slot, explode) VALUES (${getBlockId(blockName)}, ${getUserId(srcType === "minecraft:tnt" ? "TNT" : srcType === "minecraft:creeper" ? "Creeper" : "?")}, 5, ${wid}, ${x}, ${y}, ${z}, ${tileData}, -1, -1, "${Math.floor(srcX)}/${Math.floor(srcY)}/${Math.floor(srcZ)}")`);
+	session.exec(`INSERT INTO co_block (block, user, action, wid, x, y, z, data, count, slot, explode) VALUES (${getBlockId(blockName)}, ${getUserId(srcType === "minecraft:tnt" ? "TNT" : srcType === "minecraft:creeper" ? "Creeper" : srcType === "minecraft:tnt_minecart" ? "TNT minecart" : "?")}, 5, ${wid}, ${x}, ${y}, ${z}, ${tileData}, -1, -1, "${Math.floor(srcX)}/${Math.floor(srcY)}/${Math.floor(srcZ)}")`);
 }
 
 function getBlockPage(wid, x, y, z, offset) {
