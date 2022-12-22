@@ -23,9 +23,11 @@ function logBlock(pl, blockName, wid, x, y, z, action, tileData, count = -1, slo
 				if (blockPage[i][1] === -1) continue;
 				let actionText = blockPage[i][3] === 0 ? "broke" : blockPage[i][3] === 1 ? "placed" : blockPage[i][3] === 2 ? "clicked" : blockPage[i][3] === 3 ? `remove §3x${blockPage[i][4]}` : blockPage[i][3] === 4 ? `add §3x${blockPage[i][4]}` : blockPage[i][3] === 5 ? "blew up" : "?";
 				if (blockPage[i][3] === 5) {
-					let timeFormatted = timeFormat(blockPage[i][0]);
-					let temp = `§7${timeFormat(blockPage[i][0])} ago§r - `;
-					output += `${temp}§3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n${" ".repeat((temp.length - 4.65) * 1.4 + ((temp.length - temp.replaceAll(/[0-9]/g, "").length) % 2 === 0 ? 0 : 1))}^ §7${blockPage[i][6]}§r\n`
+					if (blockPage[i][5] !== 1) {
+						let temp = `§7${timeFormat(blockPage[i][0])} ago§r - `;
+						output += `${temp}§3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n${" ".repeat((temp.length - 4.65) * 1.4 + ((temp.length - temp.replaceAll(/[0-9]/g, "").length) % 2 === 0 ? 0 : 1))}^ §7${blockPage[i][6]}§r\n`;
+					}
+					else output += `§o§7${timeFormat(blockPage[i][0])} ago§r§o - §3${getUserName(blockPage[i][1])} §r§o${actionText} §3${getBlockName(blockPage[i][2])}§r§o.§r\n`;
 				}
 				else if (blockPage[i][5] !== 1) output += `§7${timeFormat(blockPage[i][0])} ago§r - §3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n`;
 				else output += `§o§7${timeFormat(blockPage[i][0])} ago§r§o - §3${getUserName(blockPage[i][1])} §r§o${actionText} §3${getBlockName(blockPage[i][2])}§r§o.§r\n`;
@@ -60,11 +62,13 @@ function lookupPage(pl, page, out) {
 		if (blockPage[i][1] === -1) continue;
 		let actionText = blockPage[i][3] === 0 ? "broke" : blockPage[i][3] === 1 ? "placed" : blockPage[i][3] === 2 ? "clicked" : blockPage[i][3] === 3 ? `remove x${blockPage[i][4]}` : blockPage[i][3] === 4 ? `add x${blockPage[i][4]}` : blockPage[i][3] === 5 ? "blew up" : "?";
 		if (blockPage[i][3] === 5) {
-			let timeFormatted = timeFormat(blockPage[i][0]);
-			let temp = `§7${timeFormat(blockPage[i][0])} ago§r - `;
-			output += `${temp}§3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n${" ".repeat((temp.length - 4.65) * 1.4)}^ §7${blockPage[i][6]}§r\n`
+			if (blockPage[i][5] !== 1) {
+				let temp = `§7${timeFormat(blockPage[i][0])} ago§r - `;
+				output += `${temp}§3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n${" ".repeat((temp.length - 4.65) * 1.4 + ((temp.length - temp.replaceAll(/[0-9]/g, "").length) % 2 === 0 ? 0 : 1))}^ §7${blockPage[i][6]}§r\n`;
+			}
+			else output += `§o§7${timeFormat(blockPage[i][0])} ago§r§o - §3${getUserName(blockPage[i][1])} §r§o${actionText} §3${getBlockName(blockPage[i][2])}§r§o.§r\n`;
 		}
-		if (blockPage[i][5] !== 1) output += `§7${timeFormat(blockPage[i][0])} ago§r - §3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n`;
+		else if (blockPage[i][5] !== 1) output += `§7${timeFormat(blockPage[i][0])} ago§r - §3${getUserName(blockPage[i][1])} §r${actionText} §3${getBlockName(blockPage[i][2])}§r.\n`;
 		else output += `§o§7${timeFormat(blockPage[i][0])} ago§r§o - §3${getUserName(blockPage[i][1])} §r§o${actionText} §3${getBlockName(blockPage[i][2])}§r§o.§r\n`;
 	}
 
